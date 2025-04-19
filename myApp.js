@@ -2,6 +2,7 @@ require('dotenv').config()
 let express = require('express');   //import express
 const req = require('express/lib/request');
 let app = express();                //create app
+let bodyParser = require('body-parser');
 
 // create a middleware logs
 function logs(req, res, next) {
@@ -94,6 +95,54 @@ app.get(
 )
 
 
+// 从客户端获取输入的查询参数   ？  =
+// API: GET /name     ?first=firstname&last=lastname
+// res: { name: 'firstname lastname'}
+// 推荐写法: app.route(path).get(handler).post(handler)
+
+// 使用 body-parser 来解析 POST 请求
+// body-parser 已经安装并且在你项目的 package.json 文件中。 
+// 在 myApp.js 文件的顶部包含（require）它，并将其存储在名为 bodyParser 的变量中。 
+// bodyParser.urlencoded({extended: false}) 返回处理 URL 编码数据的中间件。 
+// 将上一个方法调用返回的函数传递给 app.use()。
+app.use(bodyParser.urlencoded({extended: false}));
+// 像往常一样，中间件必须在所有依赖它的路由之前安装。
+// 注意： extended 是一个配置选项, 告诉 body-parser 需要使用哪个解析。 
+// 当 extended=false 时，它使用经典编码 querystring 库。 当 extended=true时，它使用 qs 库进行解析。
+// 当使用 extended=false 时，值可以只是字符串或数组。 
+// 使用 querystring 时返回的对象并不继承的 JavaScript Object，这意味着 hasOwnProperty、toString 等函数将不可用。 
+// 拓展版本的数据更加灵活，但稍逊于 JSON。
+app.use(bodyParser.json())
+// app.post(
+//     '',
+//     () => {
+app.route('/name').get(
+    (req, res) => {
+        // console.log(
+        // 'query语句',req.query
+        // );
+        let queryName = req.query;
+        let name = queryName.first + ' ' + queryName.last
+        res.json({ name: name })
+
+    }
+).post(
+    (req, res) => {
+        console.log('req.body的内容:',req.body);
+        let {first:firstName, last:lastName} = req.body;
+        // console.log('this is the testing')
+        // console.log('first:',firstName);
+        // console.log('last:', lastName);
+        // console.log('name:', `${firstName} ${lastName}`)
+        res.json({name: `${firstName} ${lastName}`})
+    }
+)
+
+
+
+
+//     }
+// )
 
 
 
